@@ -1,9 +1,17 @@
 # MyEventSourcedAkkaCQRS 3
 
-This is the third learning project.
+This is the fourth learning project.
 
-It is identical to the second, except that we can handle the creation and
-editing of multiple users, now.
+It is identical to the third, except that the command side is now split into two different levels:
+the API now calls the UserCommandAggregate, which then dispatches commands to UserCommandActors. It does
+this by either looking them up or creating new instances of them.
+
+The UserCommandActor is now individualized: there is one actor per user, and the path of the actor
+is the user UUID. For some reason, I was thinking while developing this that the path had to be identical
+to the persistenceId. It does not. So, we can have one actor per user and they can all share the same
+persistenceId, which allows our read side to continue as before. This architecture also requires that the
+individualized UserCommandActors filter events in ReceiveRecover, to only those events matching their
+userId, i.e., path.
 
 To see how it works, open two terminals on your development host (not the vagrant sandbox):
 
@@ -49,10 +57,8 @@ You will get the ID.
 curl -XPUT -v http://localhost:2015/user/$id '{"email":"money@maker.org"}'
 ```
 
-Note that the ID and timestamp remain the same when you do a GET request on all the users or the one.
 
-There is a design flaw in this application: the "command side," i.e., the UserCommandActor PersistentActor, duplicates the work of the "query side," i.e., the UserQueryActor PersistentView, in that it stores the entire state as well. So that we could use the command actor to answer our questions. We're basically doubling our memory requirements.
+So, we addressed the main design flaw in version 3 here. I have not done deletions and "last-modified" timestamps yet,
+but those are fairly minor and simple.
 
-Another problem is that we don't address deletions.
-
-We will tackle both these in project 4.
+I'll get to those in project 5.

@@ -1,4 +1,4 @@
-package esakkacqrs3
+package esakkacqrs4
 
 import java.util.UUID
 
@@ -6,18 +6,6 @@ import org.apache.commons.validator.routines.EmailValidator
 import org.joda.time.{DateTime, DateTimeZone}
 
 object Domain {
-
-  final class Id private[esakkacqrs3](val id: String)
-
-  object Id {
-    private[esakkacqrs3] def newId = java.util.UUID.randomUUID().toString
-  }
-
-  final class Timestamp private[esakkacqrs3](val timestamp: DateTime)
-
-  object Timestamp {
-    private[esakkacqrs3] def newTimestamp = new DateTime(DateTimeZone.UTC)
-  }
 
   sealed trait DomainEntity
 
@@ -45,16 +33,6 @@ object Domain {
 
   trait DomainError extends DomainResponse
 
-  case class UserCreationAck(text: String) extends DomainAck
-
-  case class UserCreationError(text: String) extends DomainError
-
-  case class EmailChangeAck(text: String) extends DomainAck
-
-  case class EmailChangeError(text: String) extends DomainError
-
-  case class UserQueryError(text: String) extends DomainError
-
   trait DomainCommand extends DomainMessage
 
   trait DomainQuery extends DomainEntity
@@ -72,6 +50,28 @@ object Domain {
   trait UserQuery extends DomainQuery
 
   trait DomainObject extends DomainEntity
+
+  final class Id private[esakkacqrs4](val id: String)
+
+  final class Timestamp private[esakkacqrs4](val timestamp: DateTime)
+
+  case class UserCreationAck(text: String) extends DomainAck
+
+  case class UserCreationError(text: String) extends DomainError
+
+  case class EmailChangeAck(text: String) extends DomainAck
+
+  case class EmailChangeError(text: String) extends DomainError
+
+  case class UserQueryError(text: String) extends DomainError
+
+  object Id {
+    private[esakkacqrs4] def newId = java.util.UUID.randomUUID().toString
+  }
+
+  object Timestamp {
+    private[esakkacqrs4] def newTimestamp = new DateTime(DateTimeZone.UTC)
+  }
 
   object Objects {
 

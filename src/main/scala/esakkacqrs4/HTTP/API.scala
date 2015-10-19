@@ -1,4 +1,4 @@
-package esakkacqrs3.HTTP
+package esakkacqrs4.HTTP
 
 import akka.actor._
 import akka.http.scaladsl.Http
@@ -8,11 +8,11 @@ import akka.stream.ActorMaterializer
 import akka.util.Timeout
 import com.typesafe.config.{Config, ConfigFactory}
 import de.heikoseeberger.akkahttpjson4s.Json4sSupport
-import esakkacqrs3.Command.UserCommandActor
-import esakkacqrs3.Domain.Commands.{ChangeUserEmail, CreateUser}
-import esakkacqrs3.Domain.Queries.{ShowUser, ShowUsers}
-import esakkacqrs3.Domain._
-import esakkacqrs3.Query.UserQueryActor
+import esakkacqrs4.Command.{UserCommandAggregate, UserCommandActor}
+import esakkacqrs4.Domain.Commands.{ChangeUserEmail, CreateUser}
+import esakkacqrs4.Domain.Queries.{ShowUser, ShowUsers}
+import esakkacqrs4.Domain._
+import esakkacqrs4.Query.UserQueryActor
 import org.json4s.{DefaultFormats, jackson}
 
 import scala.concurrent.ExecutionContext
@@ -37,9 +37,15 @@ class APIHttpService(config: Config)(implicit ec: ExecutionContext, system: Acto
 
   override def receive: Receive = Actor.emptyBehavior
 
-  def commandActor: ActorRef = context.actorOf(UserCommandActor.props(config), "user-command-actor-" + java.util.UUID.randomUUID().toString)
+//  def commandActor(id: java.util.UUID): ActorSelection = context.actorSelection(s"${id}")
+//
+//  def newCommandActor: ActorRef = context.actorOf(UserCommandActor.props(config), name=java.util.UUID.randomUUID().toString)
 
-  def queryActor: ActorRef = context.actorOf(UserQueryActor.props(config), "user-query-actor-" + java.util.UUID.randomUUID().toString)
+  val commandActorAggregate: ActorRef = context.actorOf(UserCommandAggregate.props(config), "user-command-aggregate")
+  val queryActor: ActorRef = context.actorOf(UserQueryActor.props(config), "user-query-actor")
+//  def commandActor(id: java.util.UUID): ActorSelection = commandActorAggregate.child(s"${id}")
+
+
 
   val route: Route = {
     import Json4sSupport._
@@ -50,8 +56,9 @@ class APIHttpService(config: Config)(implicit ec: ExecutionContext, system: Acto
     path("user") {
       post {
         entity(as[CreateUser]) { createUser =>
+          println(createUser)
           complete {
-            (commandActor ? createUser).mapTo[DomainResponse]
+            (commandActorAggregate ? createUser).mapTo[DomainResponse]
           }
         }
       } ~ get {
@@ -67,7 +74,7 @@ class APIHttpService(config: Config)(implicit ec: ExecutionContext, system: Acto
           // JSON object.
           val changeCommand = changeUserEmail.copy(id = id.toString)
           complete {
-            (commandActor ? changeCommand).mapTo[DomainResponse]
+            (commandActorAggregate ? changeCommand).mapTo[DomainResponse]
           }
         }
       } ~ get {

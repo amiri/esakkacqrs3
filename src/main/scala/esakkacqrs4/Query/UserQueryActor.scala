@@ -1,14 +1,14 @@
-package esakkacqrs3.Query
+package esakkacqrs4.Query
 
 import akka.actor.{ActorLogging, ActorSystem, Props}
 import akka.persistence.PersistentView
 import akka.stream.ActorMaterializer
 import akka.util.Timeout
 import com.typesafe.config.Config
-import esakkacqrs3.Domain.Events.{UserCreated, UserEmailChanged}
-import esakkacqrs3.Domain.Objects.User
-import esakkacqrs3.Domain.Queries.{ShowUsers, ShowUser}
-import esakkacqrs3.Domain.{UserEvent, UserQueryError}
+import esakkacqrs4.Domain.Events.{UserCreated, UserEmailChanged}
+import esakkacqrs4.Domain.Objects.User
+import esakkacqrs4.Domain.Queries.{ShowUsers, ShowUser}
+import esakkacqrs4.Domain.{UserEvent, UserQueryError}
 
 import scala.concurrent.ExecutionContext
 
